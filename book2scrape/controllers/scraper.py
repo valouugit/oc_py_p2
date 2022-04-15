@@ -83,7 +83,7 @@ class Scraper:
         dir = "library/Image/%s" % book.category
         if not os.path.exists(dir):
             os.makedirs(dir)
-        filename = "%s/%s.jpg" % (dir, book.title)
+        filename = "%s/%s.jpg" % (dir, book.title.replace("/", ""))
         if not os.path.exists(filename):
             res = requests.get(book.image_url, stream=True)
             with open(filename, 'wb') as img:
