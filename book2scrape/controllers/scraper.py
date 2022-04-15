@@ -4,11 +4,13 @@ from ..models.category import Category
 from ..models.book import Book
 
 class Scraper:
+    """Class for data scraping"""
     
     def __init__(self) -> None:
         pass
     
     def getAllCategories(self) -> list[Category]:
+        """Scraping all categories from homepage"""
         res = requests.get("http://books.toscrape.com")
         html = BeautifulSoup(res.content, "html.parser")
         html = html.find_all("ul")[1].find("ul")
@@ -28,9 +30,10 @@ class Scraper:
                              category : Category,
                              next : str = "",
                              books : list = []) -> list[Book]:
+        """Scraping all book on category"""
         res = requests.get("%s%s" % (category.url.rstrip("index.html"), next))
         html = BeautifulSoup(res.content, "html.parser")
-        next = self.checkNextPage(html)
+        next = self._checkNextPage(html)
         html = html.ol.find_all("article")
         for book in html:
             books.append(
@@ -48,6 +51,7 @@ class Scraper:
         
         return books
     
-    def checkNextPage(self, html) -> str or None:
+    def _checkNextPage(self, html) -> str or None:
+        """Check if next button is present"""
         if html.find(class_="next") != None:
             return html.find(class_="next").a["href"]
