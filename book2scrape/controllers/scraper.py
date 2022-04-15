@@ -10,7 +10,7 @@ class Scraper:
     def getAllCategories(self) -> list[Category]:
         res = requests.get("http://books.toscrape.com")
         html = BeautifulSoup(res.content, "html.parser")
-        html = html.find_all("ul")[1]
+        html = html.find_all("ul")[1].find("ul")
         categories = []
         for li in html.find_all("li"):
             categories.append(Category(
