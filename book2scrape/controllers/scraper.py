@@ -55,3 +55,25 @@ class Scraper:
         """Check if next button is present"""
         if html.find(class_="next") != None:
             return html.find(class_="next").a["href"]
+        
+    def getBook(self, book : Book) -> None:
+        """Scraping book data"""
+        res = requests.get(book.product_page_url)
+        html = BeautifulSoup(res.content, "html.parser")
+        
+        table = html.table.find_all("td")
+        book.universal_product_code = table[0].string
+        book.price_excluding_tax = table[2].string
+        book.price_including_tax = table[3].string
+        book.number_available = int(table[5]\
+                                    .string\
+                                    .split("(")[1]\
+                                    .split(" ")[0])
+        
+        book.title = html.h1.string
+        book.product_description = html.article.find_all("p")[3].string
+        book.review_rating = html.article.find_all("p")[2]["class"][1]
+        book.image_url = html.img["src"].replace(
+            "../..", 
+            "http://books.toscrape.com"
+        )
