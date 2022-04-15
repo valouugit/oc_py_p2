@@ -1,4 +1,4 @@
-import csv
+import csv, os
 from ..models.book import Book
 
 CSV_HEADER = [
@@ -17,7 +17,8 @@ CSV_HEADER = [
 class CsvWriter:
     
     def __init__(self) -> None:
-        pass
+        if not os.path.exists("library"):
+            os.makedirs("library")
     
     def writeBooks(self, books : list[Book]) -> None:
         with open('library/%s.csv' % books[0].category, 'w+', newline='') as fcsv:
