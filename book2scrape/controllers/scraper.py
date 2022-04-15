@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import requests
+import requests, os
 from ..models.category import Category
 from ..models.book import Book
 
@@ -77,3 +77,15 @@ class Scraper:
             "../..", 
             "http://books.toscrape.com"
         )
+        
+    def downloadBookImg(self, book : Book):
+        """Download book's image"""
+        dir = "library/Image/%s" % book.category
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        filename = "%s/%s.jpg" % (dir, book.title)
+        if not os.path.exists(filename):
+            res = requests.get(book.image_url, stream=True)
+            with open(filename, 'wb') as img:
+                for buf in res.iter_content(1024):
+                    img.write(buf)
