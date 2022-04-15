@@ -12,12 +12,12 @@ class Scraper:
         html = BeautifulSoup(res.content, "html.parser")
         html = html.find_all("ul")[1].find("ul")
         categories = []
-        for li in html.find_all("li"):
+        for cat in html.find_all("li"):
             categories.append(Category(
-                name=li.a.string.replace(" ", "").replace("\n", ""),
+                name=cat.a.string.replace(" ", "").replace("\n", ""),
                 url="%s%s" % (
                     "http://books.toscrape.com/",
-                    li.a["href"]
+                    cat.a["href"]
                 )
             ))
 
