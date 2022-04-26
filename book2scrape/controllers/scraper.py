@@ -1,15 +1,13 @@
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, ResultSet
 import requests, os
 from ..models.category import Category
 from ..models.book import Book
+from typing import List, Optional
 
 class Scraper:
     """Class for data scraping"""
     
-    def __init__(self) -> None:
-        pass
-    
-    def getAllCategories(self) -> list[Category]:
+    def getAllCategories(self) -> List[Category]:
         """Scraping all categories from homepage"""
         res = requests.get("http://books.toscrape.com")
         html = BeautifulSoup(res.content, "html.parser")
@@ -21,22 +19,23 @@ class Scraper:
                 url="%s%s" % (
                     "http://books.toscrape.com/",
                     cat.a["href"]
-                )
+                ),
+                books=[]
             ))
 
         return categories
     
-    def getAllBookInCategory(self,
-                             category : Category,
-                             next : str = "",
-                             books : list = []) -> list[Book]:
+    def getAllBooksInCategory(self, category : Category):
         """Scraping all book on category"""
-        res = requests.get("%s%s" % (category.url.rstrip("index.html"), next))
-        html = BeautifulSoup(res.content, "html.parser")
-        next = self._checkNextPage(html)
-        html = html.ol.find_all("article")
-        for book in html:
-            books.append(
+        scrape = self._scrapeBooksInOnePage(caterogy_url=category.url)
+        self._addingBookInCategory(category=category, books_html=scrape["books_html"])
+        while scrape["next_page"]:
+            scrape = self._scrapeBooksInOnePage(caterogy_url=category.url, next_page=scrape["next_page"])
+            self._addingBookInCategory(category=category, books_html=scrape["books_html"])
+
+    def _addingBookInCategory(self, category : Category, books_html : List[ResultSet]):
+        for book in books_html:
+            category.books.append(
                 Book(
                     product_page_url=book\
                         .a["href"]\
@@ -45,16 +44,21 @@ class Scraper:
                     category=category.name
                 )
             )
-        
-        if next != None:
-            self.getAllBookInCategory(category=category, next=next, books=books)
-        
-        return books
+
+    def _scrapeBooksInOnePage(self, caterogy_url : str, next_page : str = "") -> dict:
+        """Get html content for category page"""
+        res = requests.get("%s%s" % (caterogy_url.rstrip("index.html"), next_page))
+        content = BeautifulSoup(res.content, "html.parser")
+        next_page = self._getNextPageUrl(content)
+        books_html = content.ol.find_all("article")
+        return {
+            "books_html": books_html,
+            "next_page": next_page
+        }
     
-    def _checkNextPage(self, html) -> str or None:
+    def _getNextPageUrl(self, html) -> Optional[str]:
         """Check if next button is present"""
-        if html.find(class_="next") != None:
-            return html.find(class_="next").a["href"]
+        return html.find(class_="next").a["href"] if html.find(class_="next") else None
         
     def getBook(self, book : Book) -> None:
         """Scraping book data"""
