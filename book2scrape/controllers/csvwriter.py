@@ -1,5 +1,6 @@
 import csv, os
-from ..models.book import Book
+from typing import List
+from ..models.category import Category
 
 CSV_HEADER = [
     "product_page_url", 
@@ -20,11 +21,11 @@ class CsvWriter:
         if not os.path.exists("library"):
             os.makedirs("library")
     
-    def writeBooks(self, books : list[Book]) -> None:
-        with open('library/%s.csv' % books[0].category, 'w+', newline='') as fcsv:
+    def writeBooks(self, category : Category) -> None:
+        with open('library/%s.csv' % category.name, 'w+', newline='') as fcsv:
             buf = csv.DictWriter(fcsv, fieldnames=CSV_HEADER)
             buf.writeheader()
-            for book in books:
+            for book in category.books:
                 buf.writerow(
                     {
                         "product_page_url": book.product_page_url, 
