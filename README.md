@@ -8,6 +8,8 @@ Le script a pour but de récupérer les prix des livres sur un site de revente d
 
 ## Installation & Execution
 
+Fonctionnel avec Python 3.9.7
+
 Pour préparer l'environnement virtuel, vous pouvez utiliser ces commandes :
 ```bash
   python3 -m venv env
